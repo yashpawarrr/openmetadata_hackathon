@@ -1,0 +1,59 @@
+{
+  "name": "openmetadata-context",
+  "displayName": "OpenMetadata Data Context",
+  "description": "Inline documentation, lineage, and optimization intelligence for SQL",
+  "version": "1.0.0",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Data Science", "Machine Learning", "Other"],
+  "activationEvents": ["onLanguage:sql", "onLanguage:jinja-sql"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "openmetadata.search",
+        "title": "OpenMetadata: Natural Language Search"
+      },
+      {
+        "command": "openmetadata.refresh",
+        "title": "OpenMetadata: Refresh Metadata"
+      }
+    ],
+    "configuration": {
+      "title": "OpenMetadata",
+      "properties": {
+        "openmetadata.host": {
+          "type": "string",
+          "default": "http://localhost:8585",
+          "description": "OpenMetadata API host"
+        },
+        "openmetadata.token": {
+          "type": "string",
+          "default": "",
+          "description": "OpenMetadata JWT token"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [{ "id": "openmetadata", "title": "OpenMetadata", "icon": "media/icon.svg" }]
+    },
+    "views": {
+      "openmetadata": [
+        { "id": "lineageView", "name": "Lineage" },
+        { "id": "qualityView", "name": "Data Quality" }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+  "axios": "^1.6.0",
+  "node-sql-parser": "^4.0.0"
+  }
+}

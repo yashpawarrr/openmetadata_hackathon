@@ -1,0 +1,5 @@
+requests
+sqlglot
+openmetadata-ingestion
+openai>=1.0.0
+requests>=2.28.0

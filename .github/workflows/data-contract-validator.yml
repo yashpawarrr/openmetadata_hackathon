@@ -1,0 +1,16 @@
+name: Data Contract Validator
+on:
+  pull_request:
+    paths: ['**.sql']
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with: {python-version: '3.10'}
+      - name: Install dependencies
+        run: pip install -r github-action/requirements.txt
+      - name: Run Validator
+        run: python3 github-action/src/main.py

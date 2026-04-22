@@ -1,0 +1,27 @@
+name: Auto-Doc Generator
+
+on:
+  push:
+    branches: [main, master]
+    paths: ['models/**/*.sql', 'models/**/*.yml']
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install requests pyyaml
+      - name: Generate Data Dictionary
+        env:
+          OPENMETADATA_HOST: ${{ secrets.OPENMETADATA_HOST }}
+          OPENMETADATA_TOKEN: ${{ secrets.OPENMETADATA_TOKEN }}
+        run: python auto-tester/generate_tests.py --docs-only
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: auto-update data dictionary from OpenMetadata"
+          file_pattern: "docs/*.md"

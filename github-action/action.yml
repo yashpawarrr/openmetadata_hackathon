@@ -1,0 +1,41 @@
+name: 'OpenMetadata Data Contract Validator'
+description: 'Validate SQL/dbt changes against OpenMetadata lineage and contracts'
+author: 'Your Team'
+
+inputs:
+  openmetadata-host:
+    description: 'OpenMetadata API host (e.g., http://localhost:8585)'
+    required: true
+  openmetadata-token:
+    description: 'OpenMetadata JWT token'
+    required: true
+  github-token:
+    description: 'GitHub token for PR comments'
+    required: true
+  sql-path:
+    description: 'Path to SQL/dbt files to analyze'
+    required: false
+    default: 'models/'
+  fail-on-violation:
+    description: 'Fail PR if breaking changes detected'
+    required: false
+    default: 'true'
+
+outputs:
+  report:
+    description: 'Markdown report of validation results'
+  has-violations:
+    description: 'true if breaking changes found'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - '--host'
+    - ${{ inputs.openmetadata-host }}
+    - '--token'
+    - ${{ inputs.openmetadata-token }}
+    - '--sql-path'
+    - ${{ inputs.sql-path }}
+    - '--fail-on-violation'
+    - ${{ inputs.fail-on-violation }}
