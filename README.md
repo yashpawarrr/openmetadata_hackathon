@@ -65,35 +65,55 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 ## 🏗️ Architecture Diagram
 
 ┌─────────────────────────────────────────────────────────────────────┐
-│ Developer Workspace │
-├─────────────────────────────┬───────────────────────────────────────┤
-│ VS Code / Cursor Extension │ GitHub Repository │
-│ ┌─────────────────────┐ │ ┌─────────────────────────────┐ │
-│ │ • Hover provider │ │ │ .github/workflows/ │ │
-│ │ • Inline coach │◄───┼────│ ├─ data-contract-validator │ │
-│ │ • Lineage-at-glance │ │ │ └─ auto-doc-generator │ │
-│ │ • AI natural search │ │ └──────────────┬──────────────┘ │
-│ └──────────┬──────────┘ │ │ │
-│ │ │ │ │
-│ │ │ ┌──────────────▼──────────────┐ │
-│ └───────────────┼────│ OpenMetadata API Client │ │
-│ │ │ (Python + TypeScript) │ │
-│ │ └──────────────┬──────────────┘ │
-└─────────────────────────────┼───────────────────┼──────────────────┘
-│ │
-▼ ▼
-┌─────────────────────────────────────┐
-│ OpenMetadata Server │
-│ ┌─────────┐ ┌─────────┐ ┌────────┐ │
-│ │Lineage │ │Quality │ │Contract│ │
-│ │ API │ │ API │ │ API │ │
-│ └─────────┘ └─────────┘ └────────┘ │
-│ ┌─────────────────────────────────┐ │
-│ │ MySQL (metadata store) + ES │ │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
-
-
+│                        Developer Workspace                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   VS Code / Cursor Extension                                        │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │ • Hover Provider (Table + Column Docs)                      │   │
+│   │ • Inline Optimization Coach                                 │   │
+│   │ • Lineage-at-a-Glance View                                  │   │
+│   │ • Natural Language Search (OpenMetadata)                    │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                │                                    │
+│                                │ API Calls                          │
+│                                ▼                                    │
+│                    ┌──────────────────────────┐                     │
+│                    │ OpenMetadata API Client  │                     │
+│                    │ (Python + TypeScript)    │                     │
+│                    └─────────────┬────────────┘                     │
+│                                  │                                  │
+│                                  │                                  │
+│         ┌────────────────────────┼────────────────────────┐         │
+│         │                        │                        │         │
+│         ▼                        ▼                        ▼         │
+│ ┌───────────────┐     ┌────────────────┐     ┌──────────────────┐   │
+│ │ Lineage API   │     │ Quality API    │     │ Contract API     │   │
+│ └───────────────┘     └────────────────┘     └──────────────────┘   │
+│                                                                     │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                         GitHub Repository                           │
+│                                                                     │
+│  .github/workflows/                                                 │
+│  ├── data-contract-validator (CI/CD Governance)                     │ 
+│  └── auto-doc-generator (Docs Sync Bot)                             │
+│                                                                     │
+│  PR Flow:                                                           │
+│  SQL Change → Analyzer → OpenMetadata → Impact Engine → PR Comment  │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                        OpenMetadata Server                          │
+│                                                                     │
+│   ┌────────────┐   ┌────────────┐   ┌────────────┐                  │
+│   │  Lineage   │   │  Quality   │   │  Contracts │                  │
+│   └────────────┘   └────────────┘   └────────────┘                  │
+│                                                                     │
+│          ┌──────────────────────────────────────┐                   │
+│          │ MySQL (Metadata Store)+Elasticsearch │                   │
+│          └──────────────────────────────────────┘                   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 
 ---
 
