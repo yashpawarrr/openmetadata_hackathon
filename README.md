@@ -1,61 +1,176 @@
-# openmetadata_hackathon
+<!-- ===================================== -->
+<!-- ⚡ DATA NEXUS SUITE - FULL README -->
+<!-- ===================================== -->
+
+<p align="center">
+  <img src="https://via.placeholder.com/160x160.png?text=DataNexus" alt="DataNexus Logo" />
+</p>
+
+<h1 align="center">⚡ DataNexus Suite</h1>
+
+<p align="center">
+  <b>The “Shift-Left” Developer Ecosystem for OpenMetadata</b>
+</p>
+
+<p align="center">
+  Bridging the gap between <b>Data Governance</b> and <b>Software Engineering</b> inside CI/CD + IDEs
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Hackathon-WeMakeDevs-blue?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/OpenMetadata-Integrated-green?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Status-Prototype-orange?style=for-the-badge"/>
+</p>
+
+---
+
+## 🧠 Executive Summary
+
+**DataNexus** is an end-to-end developer suite that brings **data governance directly into the development workflow**.
+
+Instead of treating metadata as a post-production audit layer, DataNexus shifts it left into:
+
+- ⚙️ CI/CD pipelines  
+- 💻 IDEs (VS Code / Cursor)  
+- 🧪 Local testing environments  
+
+👉 Every query, schema change, and PR becomes **governed, optimized, and documented by default**.
+
+---
+
+## 🚨 The Core Problem
+
+Modern data teams suffer from a silent disconnect:
+
+> Metadata lives in dashboards. Developers live in code.
+
+### This causes:
+
+- 💥 Breaking changes in production tables  
+- 🔄 Constant context switching (IDE ↔ metadata tools)  
+- 📄 Stale documentation  
+- 💸 Inefficient queries with no awareness of scale or partitions  
+
+---
+
+## 🧩 Solution Overview
+
+We transform **OpenMetadata into the Central Nervous System of development**.
+
+---
+
+# 🔧 System Architecture
+
+---
+
+## 1️⃣ CI/CD Data Contract Validator (GitHub Action)
+
+Triggered on every Pull Request.
+
+### Workflow:
+- Parses SQL / YAML changes  
+- Runs lineage-based impact analysis  
+- Validates against data contracts  
+
+### Powered by:
+- OpenMetadata **Lineage API**
+
+### 🧨 Example Output:
+> ⚠️ Dropping `user_id`  
+> → Breaks 3 dashboards + 1 Airflow pipeline  
+
+---
+
+## 2️⃣ IDE Data Context (VS Code / Cursor Plugin)
+
+Brings metadata into the editor.
+
+### Features:
+- Hover-based schema insights  
+- PII / Sensitive tag alerts  
+- Ownership + glossary context  
+- Data health indicators  
+
+### Powered by:
+- OpenMetadata **Search API**
+- Entity + Tag system
+
+👉 Zero context switching. Everything inside the IDE.
+
+---
+
+## 3️⃣ Optimization Intelligence (Coding Coach)
+
+A real-time SQL intelligence layer.
+
+### Detects:
+- Full table scans  
+- Missing partition filters  
+- Expensive queries  
+
+### Powered by:
+- Table Profiling API  
+- Schema metadata  
+
+### Example:
+
+```sql
+SELECT * FROM events;
+
+🔴 Issue:
+
+5TB table scan detected
+No partition filter
+
+✅ Fix:
+
+SELECT * FROM events WHERE event_date >= CURRENT_DATE;
+4️⃣ Data Scout (Auto-Test Engine)
+
+Keeps local development aligned with production.
+
+What it does:
+Reads OpenMetadata test definitions
+Generates dbt / Great Expectations tests
+
+👉 Ensures dev ≈ production always
+
+📊 Feature Matrix
+Feature	OpenMetadata Component	Value
+Impact Analysis	Lineage API	Prevents outages
+Context Awareness	Entity API	Zero switching
+Schema Drift Detection	Versioning API	Safe changes
+Auto Documentation	Export APIs	No doc debt
+Optimization Alerts	Profiler API	Lower cost queries
+
+DataNexus transforms OpenMetadata from:
+
+📦 System of Record
+to
+🧠 System of Intelligence
+
+🎬 Hackathon Demo Moment (IMPORTANT)
+
+Show this live:
+
+Developer opens Pull Request
+Schema change detected
+Lineage impact analysis runs
+❌ PR gets blocked automatically
 
 
-Phase 1: MVP Design for the CI/CD Data Contract Validator
-The goal is to prevent "breaking changes" from hitting your production data warehouse by validating SQL/dbt changes against OpenMetadata’s lineage.
+🧭 Conclusion
 
-Architecture of the Action
-Trigger: The action runs on pull_request events.
+DataNexus is not just a tool.
 
-Detection: Use a tool (like a simple Python script using sqlparse) to extract table names/schema changes from the files modified in the PR.
+It is a developer-first governance layer that ensures:
 
-Analysis (The Core):
+Cleaner code
+Safer pipelines
+Smarter queries
+Lower costs
 
-Query the OpenMetadata REST API for the Lineage of the affected tables.
+All without leaving the IDE.
 
-Compare the proposed changes (e.g., dropping a column, changing a data type) against downstream dependencies (dashboards, other tables).
-
-Reporting: Use an existing GitHub Action (like thollander/actions-comment-pull-request) to post the results back to the PR as a "Governance Check" report.
-
-Core Logic (Pseudo-Python)
-Python
-# Use the OpenMetadata API to check for downstream impact
-def check_impact(table_fqn):
-    # API Endpoint: GET /v1/lineage/table/name/{fqn}?upstreamDepth=0&downstreamDepth=3
-    response = requests.get(f"{OM_URL}/v1/lineage/table/name/{table_fqn}?downstreamDepth=3", headers=headers)
-    lineage = response.json()
-    
-    # Logic: If 'downstreamNodes' > 0, post a warning comment to the PR
-    if lineage['downstreamEdges']:
-        return "⚠️ ALERT: This table is used by downstream dashboards! Proceed with caution."
-    return "✅ No downstream dependencies detected."
-Phase 2: MVP Design for IDE Integration (VS Code Extension)
-Developers spend their time in the IDE; bringing metadata to them reduces context switching.
-
-Core Features
-Hover Provider: Use the VS Code API registerHoverProvider. When a user hovers over a table name in a .sql file, trigger a request to OpenMetadata to fetch the entity details.
-
-The "Context" View: Use a simple API call to /v1/search/query to find the table's FQN, then fetch details via /v1/tables/name/{fqn}.
-
-Display: Render the Description, Owner, and Tags in a Markdown-formatted hover window.
-
-Phase 3: MVP Design for Automated Data Doc Generator
-This ensures documentation never goes stale by syncing your code's reality with OpenMetadata.
-
-Implementation Strategy
-Automation: Use a workflow_run trigger in GitHub Actions that fires after a merge to the main branch.
-
-Sync: Fetch the latest schema from OpenMetadata and generate a Markdown table (Data Dictionary).
-
-Update: Automatically commit this file back to your repo’s /docs folder using the stefanzweifel/git-auto-commit-action.
-
-Hackathon Execution Strategy (The "Glue")
-To build this successfully in a short period, follow this "Unified Core" strategy:
-
-Create a metadata-client library: Write one small Python package that acts as a wrapper for the OpenMetadata REST API. Your GitHub Action and your IDE extension's backend should both use this.
-
-Standardize on FQN: Always use OpenMetadata's Fully Qualified Name (FQN) as the unique identifier for tables across all three tools.
-
-Focus the Demo: For your hackathon presentation, start by showing the Data Contract Validator. It is the most impressive, as it directly prevents production bugs—the "holy grail" for data teams. Then, show how the IDE Extension would have alerted the dev before they even opened the PR.
-
-Would you like me to provide a template action.yml file to help you structure the GitHub Action, or would you prefer to explore how to set up the authentication (JWT/Bot token) for your OpenMetadata instance?
+🔮🔮🔮
+<p align="center"> <b>Built for developers. Powered by metadata. Designed for scale.</b> </p>
