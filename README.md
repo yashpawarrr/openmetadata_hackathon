@@ -2,9 +2,9 @@
 <!-- ⚡ DATA NEXUS SUITE - FULL README -->
 <!-- ===================================== -->
 
-<p align="center">
+<!-- <p align="center">
   <img src="https://via.placeholder.com/160x160.png?text=DataNexus" alt="DataNexus Logo" />
-</p>
+</p> -->
 
 <h1 align="center">⚡ DataNexus Suite</h1>
 
