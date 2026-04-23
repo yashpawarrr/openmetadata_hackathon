@@ -72,56 +72,42 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 
 ## 🏗️ Architecture Diagram
 
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        Developer Workspace                          │
+│                         Developer Workspace                          │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   VS Code / Cursor Extension                                        │
-│   ┌─────────────────────────────────────────────────────────────┐   │
-│   │ • Hover Provider (Table + Column Docs)                      │   │
-│   │ • Inline Optimization Coach                                 │   │
-│   │ • Lineage-at-a-Glance View                                  │   │
-│   │ • Natural Language Search (OpenMetadata)                    │   │
-│   └─────────────────────────────────────────────────────────────┘   │
-│                                │                                    │
-│                                │ API Calls                          │
-│                                ▼                                    │
-│                    ┌──────────────────────────┐                     │
-│                    │ OpenMetadata API Client  │                     │
-│                    │ (Python + TypeScript)    │                     │
-│                    └─────────────┬────────────┘                     │
-│                                  │                                  │
-│                                  │                                  │
-│         ┌────────────────────────┼────────────────────────┐         │
-│         │                        │                        │         │
-│         ▼                        ▼                        ▼         │
-│ ┌───────────────┐     ┌────────────────┐     ┌──────────────────┐   │
-│ │ Lineage API   │     │ Quality API    │     │ Contract API     │   │
-│ └───────────────┘     └────────────────┘     └──────────────────┘   │
+│  VS Code / Cursor Extension                                         │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │ • Hover Provider (Table + Column Docs)                        │  │
+│  │ • Inline Optimization Coach                                   │  │
+│  │ • Lineage-at-a-Glance View                                    │  │
+│  │ • Natural Language Search (OpenMetadata)                      │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
+│                         API Calls                                   │
+│                              │                                      │
+│                              ▼                                      │
+│           OpenMetadata API Client (Python + TypeScript)            │
+│                              │                                      │
+│        ┌─────────────────────┼──────────────────────┐              │
+│        ▼                     ▼                      ▼              │
+│   Lineage API         Quality API            Contract API          │
 │                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                         GitHub Repository                           │
+├──────────────────────────── GitHub Repo ───────────────────────────┤
+│ .github/workflows/                                                 │
+│  ├── data-contract-validator                                       │
+│  └── auto-doc-generator                                            │
 │                                                                     │
-│  .github/workflows/                                                 │
-│  ├── data-contract-validator (CI/CD Governance)                     │ 
-│  └── auto-doc-generator (Docs Sync Bot)                             │
+│ PR Flow:                                                           │
+│ SQL → Analyzer → OpenMetadata → Impact Engine → PR Comment        │
 │                                                                     │
-│  PR Flow:                                                           │
-│  SQL Change → Analyzer → OpenMetadata → Impact Engine → PR Comment  │
+├────────────────────────── OpenMetadata Server ─────────────────────┤
+│  Lineage   |   Quality   |   Contracts                              │
 │                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                        OpenMetadata Server                          │
-│                                                                     │
-│   ┌────────────┐   ┌────────────┐   ┌────────────┐                  │
-│   │  Lineage   │   │  Quality   │   │  Contracts │                  │
-│   └────────────┘   └────────────┘   └────────────┘                  │
-│                                                                     │
-│          ┌──────────────────────────────────────┐                   │
-│          │ MySQL (Metadata Store)+Elasticsearch │                   │
-│          └──────────────────────────────────────┘                   │
-│                                                                     │
+│  MySQL Metadata Store + Elasticsearch                               │
 └─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
