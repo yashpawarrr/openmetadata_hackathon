@@ -1,13 +1,12 @@
 import os
 import requests
+import logging
 
-import os
-import requests
+logger = logging.getLogger(__name__)
 
-def generate_ai_explanation(change_type, table, column, operation, downstream_tables, downstream_dashboards, suggested_fix):
+def generate_ai_explanation(change_type, table, column, operation, downstream_tables, downstream_dashboards, suggested_fix, cost_estimate="unknown"):
     """
-    Generate a natural language explanation of the breaking change.
-    Falls back to template if AI API is unavailable.
+    Generate natural language explanation – uses OpenAI/Ollama if available, else template.
     """
     prompt = f"""
 You are a data engineer assistant. A Pull Request is trying to {operation} {column} from table {table}.
@@ -36,9 +35,9 @@ Write a SHORT, CLEAR warning message for the PR comment. Use emojis. Be helpful,
             if resp.status_code == 200:
                 return resp.json()["choices"][0]["message"]["content"]
         except Exception as e:
-            print(f"OpenAI failed: {e}")
+            logger.warning(f"OpenAI failed: {e}")
 
-    # Try Ollama (free local)
+    # Try Ollama
     ollama_host = os.getenv("OLLAMA_HOST")
     if ollama_host:
         try:
@@ -50,9 +49,9 @@ Write a SHORT, CLEAR warning message for the PR comment. Use emojis. Be helpful,
             if resp.status_code == 200:
                 return resp.json().get("response", "")
         except Exception as e:
-            print(f"Ollama failed: {e}")
+            logger.warning(f"Ollama failed: {e}")
 
-    # Fallback: template
+        # Fallback template (includes cost estimate)
     return f"""⚠️ **Breaking Change Detected**
 
 You are trying to **{operation}** `{column}` from table `{table}`.
@@ -60,10 +59,26 @@ You are trying to **{operation}** `{column}` from table `{table}`.
 **Impact:**
 - 🔻 {len(downstream_tables)} downstream tables will break
 - 📊 {len(downstream_dashboards)} dashboards will be affected
+- 💰 *Estimated cost of a full table scan:* {cost_estimate}
 
 **Suggested Fix:** {suggested_fix}
 
 Please review before merging."""
+
+
+def send_slack_webhook(report: str, webhook_url: str) -> None:
+    """Send governance report summary to Slack channel"""
+    if not webhook_url:
+        return
+    # Trim report to fit Slack message limit (~4000 chars)
+    message = report[:3800] + "\n… *Full report on GitHub PR*" if len(report) > 3800 else report
+    try:
+        requests.post(webhook_url, json={"text": f"📊 *OpenMetadata Governance Report*\n{message}"}, timeout=5)
+        logging.info("Slack notification sent")
+    except Exception as e:
+        logging.warning(f"Slack failed: {e}")
+
+
 
 
 def generate_report(violations: list, warnings: list, impacts: list) -> str:
@@ -80,12 +95,11 @@ def generate_report(violations: list, warnings: list, impacts: list) -> str:
     if violations:
         lines.extend(["", "### ❌ Breaking Changes", ""])
         for v in violations:
-            # If this violation has AI explanation data, use it
             if v.get("ai_explanation"):
-                lines.append(v["ai_explanation"])   # already formatted
+                lines.append(v["ai_explanation"])
             else:
                 lines.append(f"- **{v['table']}**: {v['message']}")
-            lines.append("")   # blank line between issues
+            lines.append("")  # blank line between issues
 
     if warnings:
         lines.extend(["", "### ⚠️ Quality Warnings", ""])

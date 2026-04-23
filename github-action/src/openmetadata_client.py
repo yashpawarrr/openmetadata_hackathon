@@ -1,6 +1,10 @@
 import requests
 import os
+import logging
 from typing import Dict, List, Optional, Any
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class OpenMetadataClient:
     def __init__(self, host: str, token: str = None):
@@ -11,25 +15,24 @@ class OpenMetadataClient:
             "Accept": "application/json",
             "Authorization": f"Bearer {token or os.getenv('OPENMETADATA_TOKEN', '')}"
         }
+        self.timeout = 10
 
-    def get_table_by_fqn(self, fqn: str) -> Optional[Dict]:
-        url = f"{self.base_url}/tables/name/{fqn}"
+    def _request(self, method: str, path: str, params: dict = None) -> Optional[Dict]:
+        url = f"{self.base_url}{path}"
         try:
-            resp = requests.get(url, headers=self.headers)
+            resp = requests.request(method, url, headers=self.headers, params=params, timeout=self.timeout)
             resp.raise_for_status()
             return resp.json()
-        except:
+        except requests.exceptions.RequestException as e:
+            logger.error(f"OpenMetadata API error: {e}")
             return None
 
+    def get_table_by_fqn(self, fqn: str) -> Optional[Dict]:
+        return self._request("GET", f"/tables/name/{fqn}")
+
     def get_lineage(self, fqn: str, downstream_depth: int = 3) -> Dict:
-        url = f"{self.base_url}/lineage/table/name/{fqn}"
-        params = {"upstreamDepth": 0, "downstreamDepth": downstream_depth}
-        try:
-            resp = requests.get(url, headers=self.headers, params=params)
-            resp.raise_for_status()
-            return resp.json()
-        except:
-            return {"downstreamEdges": [], "nodes": []}
+        data = self._request("GET", f"/lineage/table/name/{fqn}", params={"upstreamDepth": 0, "downstreamDepth": downstream_depth})
+        return data if data else {"downstreamEdges": [], "nodes": []}
 
     def get_downstream_impact(self, fqn: str) -> Dict:
         lineage = self.get_lineage(fqn, downstream_depth=5)
@@ -48,21 +51,9 @@ class OpenMetadataClient:
         return impact
 
     def get_table_quality(self, fqn: str) -> Dict:
-        """Get data quality status from OpenMetadata"""
-        url = f"{self.base_url}/quality/table/{fqn}"
-        try:
-            resp = requests.get(url, headers=self.headers)
-            resp.raise_for_status()
-            return resp.json()
-        except:
-            return {"qualityScore": None, "tests": []}
+        data = self._request("GET", f"/quality/table/{fqn}")
+        return data if data else {"qualityScore": None, "tests": []}
 
     def get_contract(self, fqn: str) -> Dict:
-        """Get data contract for a table (OpenMetadata v1.8+)"""
-        url = f"{self.base_url}/contracts/table/{fqn}"
-        try:
-            resp = requests.get(url, headers=self.headers)
-            resp.raise_for_status()
-            return resp.json()
-        except:
-            return {"columns": [], "constraints": []}
+        data = self._request("GET", f"/contracts/table/{fqn}")
+        return data if data else {"columns": [], "constraints": []}
