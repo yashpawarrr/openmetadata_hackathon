@@ -26,30 +26,35 @@
 
 # 📊 OpenMetadata Data Governance Suite
 
-## *Enforce, Observe, and Optimize – Before Merging a Single Line of Code*
+**Enforce, Observe, and Optimize Data Changes Before They Break Production**
 
-> **Stop breaking downstream pipelines. Give every PR an AI-powered governance report, bring lineage into your IDE, and auto-document your data stack.**
+A developer-first data governance toolkit that integrates directly into **GitHub CI/CD pipelines** and **VS Code**, powered by OpenMetadata.
+
+It prevents broken pipelines, stale documentation, and expensive query mistakes by turning metadata into real-time developer intelligence.
 
 ---
 
-## 🧠 Problem Statement
+## 🚨 Problem Statement
 
-Data teams face a silent crisis:
+Modern data teams suffer from:
 
-- **Blind SQL changes** that break dashboards, tables, and reports – only discovered after merge.
-- **No governance feedback** inside the PR workflow, forcing developers to context‑switch.
-- **Stale documentation** that never keeps up with schema evolution.
-- **Expensive queries** that run full scans because nobody warned the developer about a 500 GB unpartitioned table.
+- ❌ Breaking SQL/dbt changes discovered *after deployment*
+- ❌ No governance feedback inside PR workflows
+- ❌ Stale documentation that never matches real schema
+- ❌ Expensive full-table scans due to missing query awareness
+- ❌ Metadata trapped inside dashboards instead of being in the developer workflow
 
-OpenMetadata already stores rich metadata (lineage, quality, contracts). But that metadata remains trapped inside the UI – invisible to the developer writing the code.
+👉 OpenMetadata already stores rich metadata (lineage, quality, contracts). But that metadata remains trapped inside the UI – invisible to the developer writing the code.
 
 **We built the missing bridge.**
 
 ---
 
-## 🚀 Solution Overview
+## 💡 Solution Overview
 
 The **OpenMetadata Data Governance Suite** is a production‑grade toolkit that:
+
+## *Enforce, Observe, and Optimize – Before Merging a Single Line of Code*
 
 - 🔍 **Validates every SQL/dbt change** against OpenMetadata lineage and contracts – directly in your PR.
 - 🤖 **Generates human‑readable impact narratives** (not just “violation detected”).
@@ -59,6 +64,9 @@ The **OpenMetadata Data Governance Suite** is a production‑grade toolkit that:
 - 🧪 **Creates Great Expectations / dbt tests** automatically from OpenMetadata constraints.
 
 All of this runs **inside your GitHub workflows** and **VS Code** – no extra dashboards, no context switching.
+
+
+> **Stop breaking downstream pipelines. Give every PR an AI-powered governance report, bring lineage into your IDE, and auto-document your data stack.**
 
 ---
 
@@ -159,13 +167,13 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 | **IDE**        | VS Code Extension API, TypeScript, Axios |
 | **Metadata**   | OpenMetadata REST API (v1.2+) |
 | **SQL Parsing**| `sqlparse` (Python), custom regex |
-| **AI (optional)** | OpenAI API / Ollama (local) for narrative generation |
+| **AI **        | OpenAI API / Ollama (local) for narrative generation |
 | **Testing**    | Great Expectations (auto‑generated) |
 | **Docs**       | Markdown + `git-auto-commit-action` |
 
 ---
 
-## 🔄 How It Works (Step‑by‑Step)
+## 🔄 Workflow
 
 1. **Developer opens a PR** that modifies a SQL model.
 2. GitHub Action triggers the **Data Contract Validator**.
@@ -177,7 +185,7 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
    - Posts the message as a comment on the PR.
 4. **Developer sees the comment** – for example:  
    *“⚠️ You are dropping `user_id` from `orders`. This will break 3 downstream tables and 2 dashboards. Please update `user_activity` model.”*
-5. (Optional) While coding, the **VS Code extension** shows hover cards and performance warnings in real time.
+5. While coding, the **VS Code extension** shows hover cards and performance warnings in real time.
 6. After merge, the **Auto‑Doc Generator** updates the data dictionary automatically.
 
 ---
@@ -233,8 +241,10 @@ text
 - **Automates documentation** – docs that never go stale.
 - **Shifts governance from “policing” to “enabling”** – the AI coach helps developers write better queries, not just blocks them.
 
-Real‑world value:  
+
+
 > *“A single breaking change that goes undetected can cost a data team hours of firefighting. This suite catches those changes in the PR stage – when fixing them costs minutes.”*
+
 
 ---
 
@@ -257,8 +267,6 @@ Built with ❤️ for the OpenMetadata Hackathon.
 ---
 
 **License:** MIT  
-**Questions?** Open an issue or ping us on [Slack community].
-
 
 
 🔮🔮🔮
