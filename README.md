@@ -74,7 +74,7 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         Developer Workspace                          │
+│                         Developer Workspace                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  VS Code / Cursor Extension                                         │
@@ -88,21 +88,21 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 │                         API Calls                                   │
 │                              │                                      │
 │                              ▼                                      │
-│           OpenMetadata API Client (Python + TypeScript)            │
+│           OpenMetadata API Client (Python + TypeScript)             │
 │                              │                                      │
-│        ┌─────────────────────┼──────────────────────┐              │
-│        ▼                     ▼                      ▼              │
-│   Lineage API         Quality API            Contract API          │
+│        ┌─────────────────────┼──────────────────────┐               │
+│        ▼                     ▼                      ▼               │
+│   Lineage API         Quality API            Contract API           │
 │                                                                     │
-├──────────────────────────── GitHub Repo ───────────────────────────┤
-│ .github/workflows/                                                 │
-│  ├── data-contract-validator                                       │
-│  └── auto-doc-generator                                            │
+├──────────────────────────── GitHub Repo ─────────────────────────── ┤
+│ .github/workflows/                                                  │
+│  ├── data-contract-validator                                        │
+│  └── auto-doc-generator                                             │
 │                                                                     │
-│ PR Flow:                                                           │
-│ SQL → Analyzer → OpenMetadata → Impact Engine → PR Comment        │
+│ PR Flow:                                                            │
+│ SQL → Analyzer → OpenMetadata → Impact Engine → PR Comment          │
 │                                                                     │
-├────────────────────────── OpenMetadata Server ─────────────────────┤
+├────────────────────────── OpenMetadata Server ───────────────────── ┤
 │  Lineage   |   Quality   |   Contracts                              │
 │                                                                     │
 │  MySQL Metadata Store + Elasticsearch                               │
