@@ -296,7 +296,6 @@ text
 - **Shifts governance from “policing” to “enabling”** – the AI coach helps developers write better queries, not just blocks them.
 
 
-
 > *“A single breaking change that goes undetected can cost a data team hours of firefighting. This suite catches those changes in the PR stage – when fixing them costs minutes.”*
 
 
