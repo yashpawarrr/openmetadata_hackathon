@@ -34,15 +34,15 @@ It prevents broken pipelines, stale documentation, and expensive query mistakes 
 
 ---
 
-## 🚨 Problem Statement
+## 🚨 The Problem
 
 Modern data teams suffer from:
 
-- ❌ Breaking SQL/dbt changes discovered *after deployment*
-- ❌ No governance feedback inside PR workflows
-- ❌ Stale documentation that never matches real schema
-- ❌ Expensive full-table scans due to missing query awareness
-- ❌ Metadata trapped inside dashboards instead of being in the developer workflow
+- **Blind SQL changes** break downstream dashboards, tables, and reports – discovered only after merge.
+- **No governance feedback** inside PR workflows → developers context‑switch between GitHub, OpenMetadata UI, and Slack.
+- **Stale documentation** that never keeps up with schema evolution.
+- **Expensive queries** that run full table scans because nobody warned about a 500 GB unpartitioned table.
+- **Metadata trapped** inside dashboards instead of being in the developer workflow.
 
 👉 OpenMetadata already stores rich metadata (lineage, quality, contracts). But that metadata remains trapped inside the UI – invisible to the developer writing the code.
 
@@ -62,11 +62,11 @@ The **OpenMetadata Data Governance Suite** is a production‑grade toolkit that:
 - ⚡ **Acts as a coding coach** – warns about missing partition filters, full scans, and low‑quality tables.
 - 📄 **Auto‑generates data dictionaries** and keeps them in sync with your repository.
 - 🧪 **Creates Great Expectations / dbt tests** automatically from OpenMetadata constraints.
+- 🔔 **Sends Slack notifications** when breaking changes are detected.
+
 
 All of this runs **inside your GitHub workflows** and **VS Code** – no extra dashboards, no context switching.
 
-
-> **Stop breaking downstream pipelines. Give every PR an AI-powered governance report, bring lineage into your IDE, and auto-document your data stack.**
 
 ---
 
@@ -100,7 +100,8 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 │  └── auto-doc-generator                                             │
 │                                                                     │
 │ PR Flow:                                                            │
-│ SQL → Analyzer → OpenMetadata → Impact Engine → PR Comment          │
+│ SQL → Analyzer → OpenMetadata → Impact Engine → PR Comment →        |
+|     Slack Notifications                                             │
 │                                                                     │
 ├────────────────────────── OpenMetadata Server ───────────────────── ┤
 │  Lineage   |   Quality   |   Contracts                              │
@@ -108,7 +109,6 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 │  MySQL Metadata Store + Elasticsearch                               │
 └─────────────────────────────────────────────────────────────────────┘
 ```
-
 ---
 
 ## ✨ Features
@@ -143,6 +143,12 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 - Fetches table size and partition info from OpenMetadata.
 - Shows a **lightbulb warning** with a concrete fix: *“This table is 500 GB and partitioned by `created_at`. Add a filter on `created_at`.”*
 
+### 6. 🔔 Slack Notifications – The informar
+- Sends governance report summary to a Slack channel when violations are found.
+
+### 7. 👉 Cost Estimation - The gamechanger
+- Estimates full‑scan cost based on table size (`$5/TB` model) – shows inside AI comment. | GitHub Action |
+
 ---
 
 ## 🛠️ Tech Stack
@@ -162,17 +168,31 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 ## 🔄 Workflow
 
 1. **Developer opens a PR** that modifies a SQL model.
+
 2. GitHub Action triggers the **Data Contract Validator**.
+
 3. The action:
    - Parses the changed files to detect schema modifications.
    - Calls OpenMetadata APIs to fetch downstream lineage and contracts.
    - Sends the structured impact data to an LLM (or fallback template).
    - Generates a human‑readable warning message.
    - Posts the message as a comment on the PR.
+   - Sends a **Slack summary** to the team channel.
+    
 4. **Developer sees the comment** – for example:  
    *“⚠️ You are dropping `user_id` from `orders`. This will break 3 downstream tables and 2 dashboards. Please update `user_activity` model.”*
-5. While coding, the **VS Code extension** shows hover cards and performance warnings in real time.
-6. After merge, the **Auto‑Doc Generator** updates the data dictionary automatically.
+   
+5. While coding, the **VS Code extension** shows:
+   - Hover cards with table metadata.
+   - Warnings for full scans or missing partition filters.
+   - Lineage view in the sidebar.
+    
+6. After merge, the **Auto‑Doc Generator** runs:
+   - Fetches the latest schema from OpenMetadata.
+   - Creates/updates `docs/data-dictionary.md`.
+   - Commits it back to the repo automatically.
+
+7. **Data Scout** can be run to generate test files from OpenMetadata constraints.
 
 ---
 
@@ -195,8 +215,9 @@ All of this runs **inside your GitHub workflows** and **VS Code** – no extra d
 > ---
 > *Report generated by OpenMetadata Data Contract Validator*
 
-### 🔹 VS Code Hover Card
 
+
+### 🔹 VS Code Hover Card
 
 📊 orders
 Contains all customer orders.
@@ -210,6 +231,7 @@ order_id	int	Unique order ID
 user_id	int	FK to users
 amount	decimal	Order total
 text
+
 
 ### 🔹 Inline Coach Warning
 
@@ -236,11 +258,30 @@ text
 
 ## 🧪 Getting Started (Quick Links)
 
-- **GitHub Action** – add to your `.github/workflows/`  
-  [Example workflow](.github/workflows/data-contract-validator.yml)
-- **VS Code Extension** – install from [marketplace link] or run locally  
-  `npm install && npm run compile`
-- **OpenMetadata Setup** – [Docker quickstart](https://docs.open-metadata.org/deployment)
+- ### 1. **OpenMetadata** (Docker quickstart)
+  docker run -d -p 8585:8585 -p 8586:8586 openmetadata/server:1.2.0
+
+- ### 2. GitHub Action – add to .github/workflows/data-contract-validator.yml
+
+name: Data Contract Validation
+on: [pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: your-org/data-contract-validator@v1
+        with:
+          openmetadata-host: ${{ secrets.OPENMETADATA_HOST }}
+          openmetadata-token: ${{ secrets.OPENMETADATA_TOKEN }}
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK }}   # optional
+          slack-on-violation: true
+
+- ### 3. VS Code Extension – build and run locally
+git clone https://github.com/yashpawarrr/openmetadata_hackathon
+cd vscode-extension
+npm install && npm run compile
+# Press F5 to launch Extension Development Host
 
 ---
 
@@ -253,7 +294,6 @@ Built with ❤️ for the OpenMetadata Hackathon.
 ---
 
 **License:** MIT  
-
 
 🔮🔮🔮
 <p align="center"> <b>Built for developers. Powered by metadata. Designed for scale.</b> </p>
